@@ -35,7 +35,18 @@ library(forecast)
 # p_sound: 			proportion of units that the organism is making identifiable sounds
 # p_silence_consec: proportion of _consecutive_ units that there is silence
 # number_units: 	total number of units in this sequence. must be less than 1-p_sound
-# cluster_strength: value between 0 (no clustering) to 1 (extreme clustering)
+# cluster_strength: log of the clustering value. 
+#					the exp of this is the multiplier for relative probabilites of sound
+# 					in a given unit, on the logit scale. 
+#					a small value leads to very little difference on logit scale and on prob scale
+#					a large value (e.g. 2) leads to bimodal probability distribution between 0 and max.  
+# 					value between:
+#							NA (no clustering - default)
+#							0 (negligable clustering)
+# 							1 (moderate clustering)
+# 							2 (extreme clustering)
+# 					if there is a low prevalence of sound within the available time, the clustering 
+# 					is not very powerful with this mechanism. 
 # random_start: 	randomise the start time when organism starts sound. if FALSE it defaults to starting with sound
 # seed: 			a seed if required. 
 # n_animals: 		the number of animals to simulate with the same parameters. defaults to 1. 
@@ -46,7 +57,7 @@ library(forecast)
 sim_sound <- function(p_sound = 0.20,
 					p_silence_consec = 0.50,
 					number_units = 480,
-					cluster_strength = 0,
+					cluster_strength = NA,
 					random_start = TRUE, 
 					seed = NULL, 
 					n_animals = 1, 
@@ -118,7 +129,9 @@ sim_sound <- function(p_sound = 0.20,
 
 			# Q: do we want a distribution that is more even than random? 
 			# Q: what patterns do real species show?
-			unscaled_probs <- 0.5 + (rn-0.5) * cluster_strength
+			if(is.na(cluster_strength)) logit_probs <- 0 + (rn-0.5)
+			if(!is.na(cluster_strength)) logit_probs <- 0 + (rn-0.5) * exp(cluster_strength)
+			unscaled_probs <- exp(logit_probs) / (1 + exp(logit_probs))
 			m_probs <- unscaled_probs / sum(unscaled_probs)
 
 			sound_loc_indices <- sample(1:potential_sound_units, size = sound_units, replace = FALSE, prob = m_probs) |> sort()
