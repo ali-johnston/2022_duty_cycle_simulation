@@ -1,3 +1,9 @@
+simulation_visuals_cache/
+simulation_visuals_files/
+*.rdx
+*.rdb
+*.RData
 *.png
 *.pdf
+*.log
 

@@ -99,7 +99,7 @@ sim_sound <- function(p_sound = 0.20,
 
 	# -------------------------------------------------------
 	# set up mini-function to simulate a single animal
-	sim_1_animal <- function(dummy = 1, potential_sound_units, sound_units, cluster_strength = 0, order = 41, seed = 1){
+	sim_1_animal <- function(dummy = 1, potential_sound_units, sound_units, cluster_strength = 0, order = 41, seed = 1, ...){
 
 		set.seed(dummy + (seed*1000))
 
@@ -171,7 +171,7 @@ sim_sound <- function(p_sound = 0.20,
 		sound_24 <- sound_24_newstart
 	}
 
-	if(plot_sound) plot_sound_fn(sound_24)
+	if(plot_sound) plot_sound_fn(sound_24, ...)
 
 	return(list(sounds = sound_24, seed = seed))
 }
@@ -182,11 +182,11 @@ sim_sound <- function(p_sound = 0.20,
 
 # takes the output from sim_sound
 
-plot_sound_fn <- function(sound_24, col_sound = "darkblue"){
+plot_sound_fn <- function(sound_24, col_sound = "darkblue", ...){
 	image(sound_24, 
 			yaxt = "n", ylab = "individuals", 
 			xaxt = "n", xlab = "sound units (colour = sound)",
-			col = c("white", col_sound))
+			col = c("white", col_sound), ...)
 }
 
 
@@ -256,7 +256,7 @@ sim_duty <- function(prop_recording = 0.5,
 
 	}
 
-	if(plot_duty) plot_duty_fn(loop_day, n_animals = 2, add = plot_duty_add)
+	if(plot_duty) plot_duty_fn(loop_day, n_animals = 2, add = plot_duty_add, ...)
 
 	return(list(duty = loop_day, seed = seed))
 
@@ -268,7 +268,7 @@ sim_duty <- function(prop_recording = 0.5,
 
 # this is constructed to fit with the sound plots. 
 
-plot_duty_fn <- function(loop_day, n_animals, add = TRUE, col_on = alpha("firebrick", 0.3)){
+plot_duty_fn <- function(loop_day, n_animals, add = TRUE, col_on = alpha("firebrick", 0.3), ...){
 	duty_n_animals <- loop_day
 	if(n_animals>1){
 		for(i in 2:n_animals) duty_n_animals <- rbind(duty_n_animals, loop_day)
@@ -345,8 +345,8 @@ duty <- sim_duty(prop_recording = prop_recording,
 # -------------------------------------------------------
 # plot_both
 if(plot_sound_duty){
-	plot_sound_fn(sounds$sounds)
-	plot_duty_fn(duty$duty, n_animals = n_animals)
+	plot_sound_fn(sounds$sounds, ...)
+	plot_duty_fn(duty$duty, n_animals = n_animals, ...)
 }
 
 # -------------------------------------------------------

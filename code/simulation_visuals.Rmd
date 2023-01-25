@@ -1,0 +1,391 @@
+---
+title: "Simulating animal sound and duty cycles"
+author: "A Johnston"
+date: "2023.01.25"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE)
+
+# -------------------------------------------------------
+# package loading
+
+library(tidyverse)
+library(RColorBrewer)
+
+# -------------------------------------------------------
+# folder paths
+
+wd <- "/Users/Alison/Documents/REPOS/2022_duty_cycle_simulation/"
+setwd(wd)
+
+
+# -------------------------------------------------------
+# load in functions
+
+source(paste0(wd, "code/step1_simulation_functions.R"))
+
+```
+
+## Code
+
+All code is in: 
+
+<https://github.com/ali-johnston/2022_duty_cycle_simulation>
+
+
+## Goal
+
+To simulate 
+
+ - patterns of animal sound across a day
+ 
+ - duty cycles across a day
+
+In order to identify impacts of probability of detecting an animal with a specific duty cycle
+
+
+## Simulating animal sounds
+
+We want to be able to vary animal sound by:
+
+ - How much sound they make during a 24 hour period
+ 
+ - How that sound is distributed over the day
+ 
+ - Is there a chunk of the day when they are completely quiet? 
+ 
+ - During the day when they could make sound, is the sound distributed evenly or clustered?
+
+
+## Simulating duty cycles
+
+We want to be able to vary duty cycles by:
+
+ - How much recording within a 24 hour period
+ - How that recording is distributed in chunks of minutes/hours
+
+
+## Simulations
+
+The next section will show different components of the simulation in sequence. 
+
+
+## Intro to animal sound simulation {.smaller}
+
+This is one simulation of sounds across a 24 hour period for 5 animals: 
+
+```{r, out.width = "70%", out.height = "20%"}
+# add clustering of sounds
+par(mfrow = c(1,1), mar = c(0, 5, 0, 1))
+test_sound1 <- sim_sound(p_sound = 0.20,		
+					p_silence_consec = 0.20, 	
+					number_units = 480, 		
+					cluster_strength = 0,		# create clustering of sounds within sound window
+					random_start = FALSE, 		
+					n_animals = 5, 
+					order = 61)
+
+```
+
+* The day is broken up into 480 x 3-minute chunks of time
+
+* Within each 3-minute period the animal is either making sound (blue) or is quiet (white)
+
+* Each animal makes sound for 20% of the 3-minute chunks. So 96 of the 480 chunks in their day are blue
+
+* Each animal is completely silent for 96 consecutive chunks at the end of the day. 
+
+* So the 96 sound chunks are distributed randomly among the 384 chunks at the start of the day
+
+* All of these parameters can be altered
+
+
+## We can alter the amount of time in the day that a species is consecutively quiet
+
+(the number of consecutive white chunks at the end of each row)
+
+```{r, out.width = "80%", out.height = "50%"}
+par(mfrow = c(2, 1), mar = c(2, 5, 4, 1))
+test_sound1 <- sim_sound(p_sound = 0.20,		# 20% of chunks with sound occuring
+					p_silence_consec = 0.70, 	# consecutive 80% of each day with no sound
+					number_units = 480, 		# 3 minute chunks. 480 over 24-hour period
+					cluster_strength = 0,
+					random_start = FALSE, 		# don't randomise start (easier to see what it's doing)
+					n_animals = 5, 
+					order = 61, 
+					main = "70% consecutive quiet")
+
+# add clustering of sounds
+test_sound2 <- sim_sound(p_sound = 0.20,		
+					p_silence_consec = 0.10, 	
+					number_units = 480, 		
+					cluster_strength = 0,		# create clustering of sounds within sound window
+					random_start = FALSE, 		
+					n_animals = 5, 
+					order = 61, 
+					main = "10% consecutive quiet")
+
+```
+
+
+## We can alter the amount of time during the day each species is making sound 
+
+(the number of blue chunks in each row)
+
+```{r, out.width = "80%", out.height = "50%"}
+par(mfrow = c(2, 1), mar = c(2, 5, 4, 1))
+test_sound1 <- sim_sound(p_sound = 0.10,		# 20% of chunks with sound occuring
+					p_silence_consec = 0.50, 	# consecutive 50% of each day with no sound
+					number_units = 480, 		# 3 minute chunks. 480 over 24-hour period
+					cluster_strength = 0,
+					random_start = FALSE, 		# don't randomise start (easier to see what it's doing)
+					n_animals = 5, 
+					order = 61, 
+					main = "10% of day with sound")
+
+test_sound2 <- sim_sound(p_sound = 0.40,		
+					p_silence_consec = 0.50, 	
+					number_units = 480, 		
+					cluster_strength = 0,		# create clustering of sounds within sound window
+					random_start = FALSE, 		
+					n_animals = 5, 
+					order = 61, 
+					main = "40% of day with sound")
+
+```
+
+
+## We can alter the clustering of sound during the sound period 
+
+```{r, out.width = "80%", out.height = "50%"}
+par(mfrow = c(2, 1), mar = c(2, 5, 4, 1))
+test_sound1 <- sim_sound(p_sound = 0.30,		# 20% of chunks with sound occuring
+					p_silence_consec = 0.20, 	# consecutive 50% of each day with no sound
+					number_units = 480, 		# 3 minute chunks. 480 over 24-hour period
+					cluster_strength = NA,
+					random_start = FALSE, 		# don't randomise start (easier to see what it's doing)
+					n_animals = 5, 
+					order = 61, 
+					main = "consistent start time")
+
+test_sound2 <- sim_sound(p_sound = 0.30,		
+					p_silence_consec = 0.20, 	
+					number_units = 480, 		
+					cluster_strength = 2,		# create clustering of sounds within sound window
+					random_start = FALSE, 		
+					n_animals = 5, 
+					order = 61, 
+					main = "random start time")
+
+```
+
+
+## We can alter the time during the day when species make sound 
+
+
+```{r, out.width = "80%", out.height = "50%"}
+par(mfrow = c(2, 1), mar = c(2, 5, 4, 1))
+test_sound1 <- sim_sound(p_sound = 0.20,		# 20% of chunks with sound occuring
+					p_silence_consec = 0.20, 	# consecutive 50% of each day with no sound
+					number_units = 480, 		# 3 minute chunks. 480 over 24-hour period
+					cluster_strength = NA,
+					random_start = FALSE, 		# don't randomise start (easier to see what it's doing)
+					n_animals = 5, 
+					order = 61, 
+					main = "no clustering")
+
+test_sound2 <- sim_sound(p_sound = 0.20,		
+					p_silence_consec = 0.20, 	
+					number_units = 480, 		
+					cluster_strength = NA,		# create clustering of sounds within sound window
+					random_start = TRUE, 		
+					n_animals = 5, 
+					order = 61, 
+					main = "strong clustering")
+
+```
+
+
+## We can alter the number of animals
+
+```{r, out.width = "80%", out.height = "70%"}
+par(mfrow = c(1, 1), mar = c(2, 5, 4, 1))
+test_sound1 <- sim_sound(p_sound = 0.20,		# 20% of chunks with sound occuring
+					p_silence_consec = 0.50, 	# consecutive 50% of each day with no sound
+					number_units = 480, 		# 3 minute chunks. 480 over 24-hour period
+					cluster_strength = 2,
+					random_start = TRUE, 		# don't randomise start (easier to see what it's doing)
+					n_animals = 100, 
+					order = 61, 
+					main = "100 animals")
+
+```
+
+
+## Adding duty cycles
+
+
+## There are also functions to simulate duty cycles
+
+ - These alter the amount of time during a day that recording is happening
+ - And how recording is distributed over the day
+ 
+ 
+## Simulating different duty cycles with animals
+
+(red = recording on)
+
+```{r, out.width = "80%", out.height = "50%"}
+par(mfrow = c(2, 1), mar = c(2, 5, 4, 1))
+
+test_sound_duty1 <- sim_sound_duty(p_sound = 0.10,
+					p_silence_consec = 0.70,
+					number_units = 480,
+					cluster_strength = NA,
+					order = 61,
+					random_start_sound = TRUE, 
+					n_animals = 5, 
+					prop_recording = 0.20,
+					units_per_chunk = 40,
+					random_start_duty = TRUE,
+					plot_sound_duty = TRUE)
+
+test_sound_duty2 <- sim_sound_duty(p_sound = 0.10,
+					p_silence_consec = 0.70,
+					number_units = 480,
+					cluster_strength = 2,
+					order = 61,
+					random_start_sound = TRUE, 
+					n_animals = 5, 
+					prop_recording = 0.20,
+					units_per_chunk = 40,
+					random_start_duty = TRUE,
+					plot_sound_duty = TRUE)
+
+```
+
+
+## Summarising animals 'caught'
+
+```{r, eval = TRUE, echo = TRUE}
+sim1 <- sim_sound_duty(
+  p_sound = 0.10,          # proportion of sound 
+  p_silence_consec = 0.70, # prop of consecutive silence
+  number_units = 480,      # number of time units 
+  cluster_strength = NA,   # cluster strength (NA = none)
+  random_start_sound = TRUE, # random start time of sound
+  n_animals = 1000,        # number of animals
+  prop_recording = 0.20,   # prop of day with recording
+  units_per_chunk = 40,    # no. time units per recording
+  random_start_duty = TRUE,# random start time of DC
+  plot_sound_duty = FALSE, # plot the simulations
+  seed = 283)              # set.seed for simulation
+```
+
+
+## Summarising animals 'caught'
+
+```{r, echo = TRUE, eval = FALSE}
+
+hist(sim1$no_detections)
+
+```
+
+
+```{r, eval = TRUE, echo = FALSE}
+
+hist(sim1$no_detections, breaks = seq(0, 31, by = 1), col = c(alpha("firebrick", 0.4), rep("grey", 30)), main = "")
+
+# proportion animals not detected
+round(mean(sim1$no_detections == 0), 2)
+```
+
+
+## Simulating an array of parameters 
+
+```{r, echo = FALSE, eval = TRUE, cache = TRUE, out.height = "80%", out.width = "75%"}
+# for now the simulations are in units of 3 mins
+
+# set up variation in proportion of the day with sound
+single_unit_mins <- 3
+tot_mins <- 24*60
+tot_units <- tot_mins / single_unit_mins
+units_sound <- seq(1, round(tot_units*0.25), by = 5)
+
+# set up variation in how many units of consecutive silence
+units_silence_consec <- seq(0.5, 0.95, by = 0.05)*tot_units |> round()
+units_sound_contained <- tot_units - units_silence_consec
+
+# set up distribution in gaps between units with sound
+
+
+
+#########################################################
+## set duty cycle parameters 
+
+## for now just picking one as a test case
+## eventually this will be automated in an array of 
+## simulations
+
+propn_sampling <- 0.25
+number_units_per_chunk <- 40 
+# with 3-minute units:
+# 20 units = 1 hour
+
+
+
+#########################################################
+## set up results matrix and loop through simulations
+
+res_mat <- matrix(NA, nrow = length(units_sound), ncol = length(units_silence_consec))
+
+for(kkk in 1:length(units_sound)){
+
+	viable_gaps <- (tot_units - units_silence_consec) >= units_sound[kkk]
+	if(any(viable_gaps)){
+		for(jjj in which(viable_gaps)){
+
+			n_animals <- 100
+
+			run_sim <- sim_sound_duty(p_sound = units_sound[kkk] / tot_units,
+								p_silence_consec = units_silence_consec[jjj] / tot_units,
+								number_units = tot_units,
+								cluster_strength = 1,
+								seed = (kkk*1000) + jjj, 
+								n_animals = n_animals, 
+								order = 41,
+								prop_recording = propn_sampling,
+								units_per_chunk = number_units_per_chunk)
+
+			detected <- run_sim$no_detections > 0
+			res_mat[kkk, jjj] <- as.numeric(sum(detected) / length(detected))
+
+		}
+	}
+}
+
+
+res_long <- data.frame(units_sound = rep(units_sound, length(units_silence_consec)),
+						units_silence_consec = sort(rep(units_silence_consec, length(units_sound))),
+						prop_detected = as.vector(res_mat)) |>
+				mutate(prop_sound = units_sound / tot_units) |>
+				mutate(prop_sound_contained = 1 - (units_silence_consec / tot_units))
+
+
+ggplot(data=res_long, aes(x = prop_sound, y = prop_sound_contained)) + 	
+	geom_tile(aes(fill = prop_detected)) + 
+	scale_fill_gradientn(limits = c(0, 1), colours = brewer.pal(8, "YlGnBu")) + 
+	xlab("Proportion of day with sound") + 
+	ylab("Proportion of day containing all sound") + 
+	theme_bw() + 
+	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+
+```
+
+
+
+
+
